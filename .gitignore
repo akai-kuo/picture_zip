@@ -1,1 +1,15 @@
 .DS_Store
+
+# 依賴套件（用 npm install 重新生成）
+node_modules/
+
+# 環境變數（機密設定，各自本機用）
+.env
+
+# formidable 上傳暫存區 / 圖片處理輸出區（執行期間產生的圖片，不用進版本庫）
+# .gitkeep 是空檔案，只是用來讓這兩個資料夾在 git clone 下來時還在，
+# 資料夾裡實際的圖片檔案不會被追蹤、也不會上傳到 GitHub
+uploads/*
+!uploads/.gitkeep
+output/*
+!output/.gitkeep
