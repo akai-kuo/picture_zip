@@ -13,11 +13,11 @@ router.post(
   inspectImage
 );
 
-router.post(
-  "/process",
-  uploadImage.single(uploadConfig.fieldName),
-  validateUploadedImage
-  //  processImage
-);
+//  router.post(
+//    "/process",
+//    uploadImage.single(uploadConfig.fieldName),
+//    validateUploadedImage
+//  processImage
+//  );
 
 export default router;
