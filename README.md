@@ -5,7 +5,7 @@
 ## 技術棧
 
 - Node.js + Express — API server
-- formidable — 接收檔案上傳
+- multer — 接收檔案上傳
 - sharp — 圖片壓縮、縮放、轉檔
 - dotenv — 管理環境變數
 - cors — 跨網域請求支援
@@ -43,12 +43,12 @@ image-optimizer/
 │   └── images.js       # 圖片上傳、壓縮、轉檔的路由與邏輯
 ├── public/
 │   └── index.html      # 前台操作頁面
-├── uploads/            # formidable 暫存區（處理完自動刪除）
+├── uploads/            # multer 暫存區（處理完自動刪除）
 ├── output/             # 處理完成的圖片
 └── .env.example        # 環境變數範本
 ```
 
-## 環境變數說明（.env）
+## 環境變數說明（.env） 待其他組員完成，以下為暫定
 
 ```
 PORT=3000                 # 伺服器埠號，預設 3000
@@ -84,7 +84,7 @@ curl http://localhost:3000/images/health
 
 | 欄位 | 類型 | 必填 | 說明 |
 |---|---|---|---|
-| `image` | file | ✅ | 上傳的圖片（支援 JPG / PNG / WebP，限 5MB） |
+| `image` | file | ✅ | 上傳的圖片（支援 JPG / PNG / WebP / AVIF，限 15MB） |
 | `format` | string | ❌ | 輸出格式，預設 `webp`，可選 `jpeg` / `png` |
 | `quality` | number | ❌ | 壓縮品質 1-100，預設 `80` |
 | `maxWidth` | number | ❌ | 最大寬度（px），原圖較小時不會放大 |
@@ -132,14 +132,19 @@ curl -X POST http://localhost:3000/images/process \
 
 ## 常見錯誤
 
-| 情境 | 狀態碼 | 錯誤訊息（message） |
-|---|---|---|
-| 沒有上傳圖片 | 400 | 請上傳圖片 |
-| 上傳非圖片格式 | 400 | 只支援圖片檔案 |
-| 檔案超過 5MB | 413 | 圖片太大，請上傳較小的檔案 |
-| quality 超出 1-100 | 400 | 品質請輸入 1 到 100 |
-| maxWidth 非正整數 | 400 | maxWidth 必須是正整數 |
-| 圖片處理失敗 | 500 | 圖片處理失敗，請稍後再試 |
+> ⚠️ 以下「檔案大小」「格式驗證」相關的錯誤（前 4 項）已對照負責上傳驗證的組員實際程式碼確認；「品質」「maxWidth」「圖片處理失敗」屬於壓縮功能，該功能尚未實作，數值待確認。
+
+| 情境 | 狀態碼 | 錯誤代碼（error.code） | 錯誤訊息（error.message） |
+|---|---|---|---|
+| 沒有上傳圖片 | 400 | `FILE_REQUIRED` | 請上傳一張圖片。 |
+| 上傳格式不支援（副檔名/MIME 層級） | 400 | `UNSUPPORTED_CLIENT_MIME_TYPE` | 僅支援 JPEG、PNG、WebP 與 AVIF 圖片。 |
+| 上傳格式不支援（實際二進位內容層級） | 415 | `UNSUPPORTED_IMAGE_FORMAT` | 目前僅支援 JPEG、PNG、WebP 與 AVIF。 |
+| 檔案超過 15MB | 413 | `FILE_TOO_LARGE` | 上傳圖片超過檔案大小限制。 |
+| quality 超出 1-100 | 400 | 待確認 | 品質請輸入 1 到 100（壓縮功能尚未實作） |
+| maxWidth 非正整數 | 400 | 待確認 | maxWidth 必須是正整數（壓縮功能尚未實作） |
+| 圖片處理失敗 | 500 | 待確認 | 圖片處理失敗，請稍後再試（壓縮功能尚未實作） |
+
+> 回應格式已對照上傳驗證層實際程式碼確認：成功 `{ success: true, data: {...} }`，失敗 `{ success: false, error: { code, message } }`。
 
 ## 產品用心點
 
@@ -159,5 +164,5 @@ curl -X POST http://localhost:3000/images/process \
 
 - **使用的 AI 服務**： Claude
 - **AI 加速了哪些環節**： 專案架構規劃、前端網路頁面設計與架構、錯誤處理邏輯
-- **小組自己判斷的地方**：（例如：選擇 formidable 而非 multer、資料夾結構的調整、前台 UI 設計）
+- **小組自己判斷的地方**：（例如：選擇 multer 而非 formidable、資料夾結構的調整、前台 UI 設計）
 - **最有幫助的一次對話**：（用一句話描述）
