@@ -1,9 +1,13 @@
-import app from "./app.js";
+// server.js
+// 啟動伺服器
 
-const port = Number(process.env.PORT) || 3000;
+require("dotenv").config();
+const app = require("./app");
 
-const server = app.listen(port, () => {
-  console.log(`Image API listening on port ${port}`);
+const PORT = Number(process.env.PORT) || 3000;
+
+const server = app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });
 
 function shutdown(signal) {

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelGrain — 圖片壓縮與轉檔工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <path d="M3 9h18M9 21V9" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-name">PixelGrain</span>
+          <span class="logo-tagline">圖片壓縮與轉檔工具</span>
+        </div>
+      </a>
+      <span class="header-badge">後端 Sharp 處理 · WebP / JPEG / PNG</span>
+    </div>
+  </header>
+
+  <!-- ===== 主要內容 ===== -->
+  <main class="main">
+
+    <!-- 頁面標題 -->
+    <div class="hero">
+      <h1 class="hero-title">壓縮轉檔，<span>圖片優化</span></h1>
+      <p class="hero-desc">支援 JPG、PNG、WebP 格式壓縮與轉檔，由後端 Sharp 引擎處理，輸出品質更穩定。</p>
+    </div>
+
+    <!-- 上傳區 -->
+    <div class="upload-zone" id="upload-zone">
+      <div class="upload-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+      </div>
+      <p class="upload-title">拖曳圖片至此處</p>
+      <p class="upload-subtitle">或點擊下方按鈕選擇檔案</p>
+      <button class="upload-btn" id="upload-btn-trigger">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+        選擇圖片
+      </button>
+      <p class="upload-hint">
+        支援格式：<span>JPG</span><span>PNG</span><span>WebP</span>
+        &nbsp;·&nbsp; 單檔限制 <span>5MB</span> &nbsp;·&nbsp; 單次最多 <span>20 張</span>
+      </p>
+      <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp" />
+    </div>
+
+    <!-- 設定面板 -->
+    <div class="settings-panel">
+      <div class="settings-header">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+        </svg>
+        <span class="settings-title">壓縮設定</span>
+      </div>
+
+      <div class="settings-grid">
+
+        <!-- 壓縮品質 -->
+        <div class="setting-group">
+          <label class="setting-label">
+            壓縮品質
+            <span class="setting-label-value" id="quality-display">80%</span>
+          </label>
+          <input type="range" id="quality-slider" min="1" max="100" value="80" />
+        </div>
+
+        <!-- 輸出格式 -->
+        <div class="setting-group">
+          <label class="setting-label">輸出格式</label>
+          <div class="format-select-group" id="format-group">
+            <button class="format-btn active" data-format="webp">WebP</button>
+            <button class="format-btn" data-format="jpeg">JPG</button>
+            <button class="format-btn" data-format="png">PNG</button>
+          </div>
+        </div>
+
+        <!-- 最大寬度 -->
+        <div class="setting-group">
+          <label class="setting-label">最大寬度（可選）</label>
+          <div class="size-inputs">
+            <div class="size-input-wrap">
+              <input type="number" id="max-width" placeholder="例如 1920" min="1" max="9999" />
+              <span class="size-input-unit">px</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 操作按鈕列 -->
+    <div class="action-bar" id="action-bar" style="display:none;">
+      <div class="action-bar-left">
+        <span class="file-count-badge">已選擇 <strong id="file-count">0</strong> 張圖片</span>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-ghost" id="clear-all-btn">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          清除全部
+        </button>
+        <button class="btn btn-secondary" id="add-more-btn">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          繼續新增
+        </button>
+        <button class="btn btn-primary" id="compress-btn">
+          <svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          開始壓縮
+        </button>
+        <button class="btn btn-download-all" id="download-all-btn" style="display:none;">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          下載全部
+        </button>
+      </div>
+    </div>
+
+    <!-- 圖片列表 -->
+    <div class="image-list-section" id="image-list-section">
+      <div class="section-header">
+        <span class="section-title">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          圖片列表
+        </span>
+      </div>
+      <div class="image-list" id="image-list"></div>
+    </div>
+
+    <!-- 統計摘要 -->
+    <div class="summary-bar" id="summary-bar">
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="stat-count">0</div>
+        <div class="summary-stat-label">已處理張數</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="stat-original">—</div>
+        <div class="summary-stat-label">原始大小</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="stat-compressed">—</div>
+        <div class="summary-stat-label">壓縮後大小</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="stat-saved" style="color:var(--color-success);">—</div>
+        <div class="summary-stat-label">節省空間</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <p class="footer-text">
+      PixelGrain &mdash; 圖片由後端 Sharp 引擎壓縮處理，上傳檔案僅供當次使用，處理後自動刪除。
+    </p>
+  </footer>
+
+  <!-- ===== Toast 容器 ===== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ===== JavaScript ===== -->
+  <script src="frontend.js"></script>
+</body>
+</html>
