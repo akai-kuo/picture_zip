@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { uploadImage, uploadConfig } from "../config/upload.config.js";
-import { validateUploadedImage } from "../middlewares/validate-image.middleware.js";
-import { inspectImage } from "../controllers/image.controller.js";
+const { Router } = require("express");
+const { uploadImage, uploadConfig } = require("../config/upload.config");
+const { validateUploadedImage } = require("../middlewares/validate-image.middleware");
+const { inspectImage } = require("../controllers/image.controller");
 // import { inspectImage, processImage } from "../controllers/image.controller.js";
 
 const router = Router();
@@ -20,4 +20,4 @@ router.post(
 //  processImage
 //  );
 
-export default router;
+module.exports = router;

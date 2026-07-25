@@ -1,4 +1,4 @@
-export class AppError extends Error {
+module.exports = class AppError extends Error {
   constructor({ message, code = "INTERNAL_ERROR", statusCode = 500, details }) {
     super(message);
 
@@ -9,4 +9,4 @@ export class AppError extends Error {
 
     Error.captureStackTrace?.(this, AppError);
   }
-}
+};

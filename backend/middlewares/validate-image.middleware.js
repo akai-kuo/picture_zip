@@ -1,13 +1,15 @@
-import { inspectAndValidateImage } from "../services/image-validation.service.js";
+const { inspectAndValidateImage } = require("../services/image-validation.service");
 
-export async function validateUploadedImage(req, res, next) {
-  try {
-    const imageInfo = await inspectAndValidateImage(req.file);
+module.exports = {
+  validateUploadedImage: async function (req, res, next) {
+    try {
+      const imageInfo = await inspectAndValidateImage(req.file);
 
-    req.imageInfo = imageInfo;
+      req.imageInfo = imageInfo;
 
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
+      next();
+    } catch (error) {
+      next(error);
+    }
+  },
+};

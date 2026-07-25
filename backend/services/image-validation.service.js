@@ -1,6 +1,6 @@
-import sharp from "sharp";
-import { fileTypeFromBuffer } from "file-type";
-import { AppError } from "../errors/app-error.js";
+const sharp = require("sharp");
+const { fileTypeFromBuffer } = require("file-type");
+const { AppError } = require("../errors/app-error");
 
 const allowedDetectedTypes = new Map([
   ["image/jpeg", "jpeg"],
@@ -16,7 +16,11 @@ const MAX_HEIGHT = 12_000;
 // 8,000 × 6,000 = 48,000,000。
 const MAX_PIXELS = 50_000_000;
 
-export async function inspectAndValidateImage(file) {
+module.exports = {
+  inspectAndValidateImage,
+};
+
+async function inspectAndValidateImage(file) {
   if (!file) {
     throw new AppError({
       statusCode: 400,
