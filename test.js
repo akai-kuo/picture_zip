@@ -20,3 +20,8 @@ compressImage('input.jpg', 'output4.jpg', 80, undefined, 'jpeg')
   .then((result) => {
     console.log('測試4 (指定輸出 jpeg):', result);
   });
+
+compressImage('input.jpg', 'output5.jpg', 80, undefined, 'jpeg')
+  .then((result) => {
+    console.log('測試5 (驗證 warning 機制):', result);
+  });

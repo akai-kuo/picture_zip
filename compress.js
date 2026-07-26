@@ -22,6 +22,14 @@ async function compressImage(inputPath, outputPath, quality = 80, width, format 
   const compressedStats = fs.statSync(outputPath); // 取得壓縮後檔案資訊
   const compressedSize = compressedStats.size; // 取得壓縮後檔案大小 (bytes)
 
+
+  let warning = null;  // 先假設沒有警告
+
+if (compressedSize > originalSize) {
+  warning = '壓縮後檔案大小比原始檔案還大';  // 這裡要填一句提示文字,告訴使用者發生了什麼事
+}
+
+
   // 計算節省的百分比
   const savedPercent = ((originalSize - compressedSize) / originalSize) * 100;
 
@@ -30,7 +38,8 @@ async function compressImage(inputPath, outputPath, quality = 80, width, format 
     originalSize: originalSize,
     format: format,
     outputSize: compressedSize,
-    savedPercent: savedPercent.toFixed(1) // .toFixed(1) 保留一位小數
+    savedPercent: savedPercent.toFixed(1), // .toFixed(1) 保留一位小數
+    warning: warning
   };
 }
 module.exports = compressImage; // 匯出 compressImage 函式，讓其他檔案可以使用
