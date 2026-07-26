@@ -1,7 +1,7 @@
 const sharp = require('sharp');
 const fs = require('fs');
 
-async function compressImage(inputPath, outputPath, quality = 80, width) { 
+async function compressImage(inputPath, outputPath, quality = 80, width, format = 'webp') { 
   // 步驟1: 取得原始檔案大小
   const originalStats = fs.statSync(inputPath); // 取得檔案資訊
   const originalSize = originalStats.size; // 取得檔案大小 (bytes)
@@ -15,7 +15,7 @@ async function compressImage(inputPath, outputPath, quality = 80, width) {
     }
   }
   await imageProcess
-    .webp({ quality: quality }) // 設定壓縮品質
+    .toFormat(format, { quality: quality }) // 設定壓縮品質和格式
     .toFile(outputPath); // 壓縮後存檔
 
   // 步驟3: 取得壓縮後檔案大小
@@ -28,7 +28,8 @@ async function compressImage(inputPath, outputPath, quality = 80, width) {
   return {
     outputPath: outputPath,
     originalSize: originalSize,
-    compressedSize: compressedSize,
+    format: format,
+    outputSize: compressedSize,
     savedPercent: savedPercent.toFixed(1) // .toFixed(1) 保留一位小數
   };
 }

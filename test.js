@@ -15,3 +15,8 @@ compressImage('input.jpg', 'output3.webp', undefined, 300)
   .then((result) => {
     console.log('測試3 (沒傳 quality,應該自動用 80):', result);
   });
+
+compressImage('input.jpg', 'output4.jpg', 80, undefined, 'jpeg')
+  .then((result) => {
+    console.log('測試4 (指定輸出 jpeg):', result);
+  });
