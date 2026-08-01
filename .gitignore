@@ -1,3 +1,6 @@
+output.webp
+output2.webp
+output3.webp
 .DS_Store
 
 # 依賴套件（用 npm install 重新生成）
