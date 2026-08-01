@@ -4,19 +4,19 @@
   "private": true,
   "description": "圖片壓縮與轉檔工具",
   "main": "server.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "express": "^4.19.2",
-    "formidable": "^3.5.1",
-    "sharp": "^0.33.4",
     "file-type": "^22.0.1",
-    "multer": "^2.2.0"
+    "formidable": "^3.5.1",
+    "multer": "^2.2.0",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

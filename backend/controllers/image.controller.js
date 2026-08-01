@@ -1,4 +1,8 @@
-export async function inspectImage(req, res, next) {
+module.exports = {
+  inspectImage,
+};
+
+async function inspectImage(req, res, next) {
   try {
     res.status(200).json({
       success: true,

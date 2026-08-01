@@ -1,18 +1,20 @@
-import multer from "multer";
+const multer = require("multer");
 
 const MB = 1024 * 1024;
 
-export const uploadConfig = {
-  fieldName: "image",
-  maxFileSize: 15 * MB,
-  maxFiles: 1,
-  allowedClientMimeTypes: new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]),
+module.exports = {
+  uploadConfig: {
+    fieldName: "image",
+    maxFileSize: 15 * MB,
+    maxFiles: 1,
+    allowedClientMimeTypes: new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]),
+  },
 };
 
 const storage = multer.memoryStorage();
 
 function fileFilter(req, file, callback) {
-  const { allowedClientMimeTypes } = uploadConfig;
+  const { allowedClientMimeTypes } = module.exports.uploadConfig;
 
   if (!allowedClientMimeTypes.has(file.mimetype)) {
     const error = new multer.MulterError("LIMIT_UNEXPECTED_FILE");
@@ -25,12 +27,12 @@ function fileFilter(req, file, callback) {
   return callback(null, true);
 }
 
-export const uploadImage = multer({
+module.exports.uploadImage = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: uploadConfig.maxFileSize,
-    files: uploadConfig.maxFiles,
+    fileSize: module.exports.uploadConfig.maxFileSize,
+    files: module.exports.uploadConfig.maxFiles,
 
     // 限制非檔案欄位數量，例如 format、quality。
     fields: 10,

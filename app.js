@@ -1,7 +1,5 @@
 // app.js
 // 組裝 middleware 與路由
-import imageRoutes from "./backend/routes/image.routes.js";
-import { errorHandler, notFoundHandler } from "./backend/middlewares/error.middleware.js";
 
 const express = require("express");
 const cors = require("cors");
@@ -9,6 +7,9 @@ const path = require("path");
 const fs = require("fs");
 
 const imagesRouter = require("./routes/images");
+
+const imageRoutes = require("./backend/routes/image.routes");
+const { errorHandler, notFoundHandler } = require("./backend/middlewares/error.middleware");
 
 const app = express();
 
