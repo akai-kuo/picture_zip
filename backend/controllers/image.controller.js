@@ -1,35 +1,34 @@
-module.exports = {
-  inspectImage,
-};
+const { processImageBuffer } = require("../services/image-processing.service");
 
 async function inspectImage(req, res, next) {
   try {
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: {
-        image: req.imageInfo,
-      },
+      data: { image: req.imageInfo },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
-// export async function processImage(req, res, next) {
-//   try {
-//     const inputBuffer = req.file.buffer;
-//     const originalInfo = req.imageInfo;
+async function processImage(req, res, next) {
+  try {
+    const result = await processImageBuffer(req.file.buffer, req.imageInfo, {
+      format: req.body.format,
+      quality: req.body.quality,
+      maxWidth: req.body.maxWidth,
+    });
 
-// 接下來交給圖片壓縮／轉檔 Service。
-// const result = await imageProcessingService.process(...);
+    return res.status(200).json({
+      success: true,
+      data: {
+        original: req.imageInfo,
+        output: result,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
 
-//     res.status(200).json({
-//       success: true,
-//       data: {
-//         original: originalInfo
-//       }
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
+module.exports = { inspectImage, processImage };

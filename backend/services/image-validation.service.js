@@ -1,6 +1,5 @@
 const sharp = require("sharp");
-const { fileTypeFromBuffer } = require("file-type");
-const { AppError } = require("../errors/app-error");
+const AppError = require("../errors/app-error");
 
 const allowedDetectedTypes = new Map([
   ["image/jpeg", "jpeg"],
@@ -11,14 +10,16 @@ const allowedDetectedTypes = new Map([
 
 const MAX_WIDTH = 12_000;
 const MAX_HEIGHT = 12_000;
-
-// 例如限制為 50 百萬像素。
-// 8,000 × 6,000 = 48,000,000。
 const MAX_PIXELS = 50_000_000;
 
-module.exports = {
-  inspectAndValidateImage,
-};
+// file-type v22 是 ESM 套件；本專案是 CommonJS，因此使用 dynamic import。
+let fileTypeModulePromise;
+function getFileTypeModule() {
+  if (!fileTypeModulePromise) {
+    fileTypeModulePromise = import("file-type");
+  }
+  return fileTypeModulePromise;
+}
 
 async function inspectAndValidateImage(file) {
   if (!file) {
@@ -37,7 +38,8 @@ async function inspectAndValidateImage(file) {
     });
   }
 
-  // 不信任原始檔名與 client MIME，先檢查真實二進位格式。
+  // 第二層驗證：依 Magic Number 判斷真實檔案格式，不只信任副檔名與 client MIME。
+  const { fileTypeFromBuffer } = await getFileTypeModule();
   const detectedType = await fileTypeFromBuffer(file.buffer);
 
   if (!detectedType) {
@@ -62,13 +64,11 @@ async function inspectAndValidateImage(file) {
     });
   }
 
-  // 可選：記錄 client 宣告值與真實值不一致。
-  // 不一定要直接拒絕，因為部分瀏覽器可能提供較通用的 MIME。
   const mimeTypeMismatch = file.mimetype !== detectedType.mime;
-
   let metadata;
 
   try {
+    // 第三層驗證：讓真正的圖片解碼器解析，並限制總像素數。
     metadata = await sharp(file.buffer, {
       failOn: "warning",
       limitInputPixels: MAX_PIXELS,
@@ -80,9 +80,10 @@ async function inspectAndValidateImage(file) {
       statusCode: 422,
       code: "INVALID_IMAGE_FILE",
       message: "圖片已損壞、內容不完整或尺寸超出限制。",
-      details: {
-        reason: process.env.NODE_ENV === "development" ? error.message : undefined,
-      },
+      details:
+        process.env.NODE_ENV === "development"
+          ? { reason: error.message }
+          : undefined,
     });
   }
 
@@ -101,10 +102,7 @@ async function inspectAndValidateImage(file) {
       statusCode: 413,
       code: "IMAGE_DIMENSIONS_TOO_LARGE",
       message: `圖片寬高不得超過 ${MAX_WIDTH} × ${MAX_HEIGHT} 像素。`,
-      details: {
-        width: metadata.width,
-        height: metadata.height,
-      },
+      details: { width: metadata.width, height: metadata.height },
     });
   }
 
@@ -122,7 +120,6 @@ async function inspectAndValidateImage(file) {
     });
   }
 
-  // 防止格式判定工具與解碼器判定不一致。
   if (metadata.format !== detectedFormat) {
     throw new AppError({
       statusCode: 422,
@@ -136,15 +133,12 @@ async function inspectAndValidateImage(file) {
   }
 
   const pageCount = metadata.pages ?? 1;
-
   if (pageCount > 1) {
     throw new AppError({
       statusCode: 422,
       code: "ANIMATED_IMAGE_NOT_SUPPORTED",
       message: "目前不支援動畫或多頁圖片。",
-      details: {
-        pages: pageCount,
-      },
+      details: { pages: pageCount },
     });
   }
 
@@ -173,3 +167,5 @@ function sanitizeDisplayFileName(originalName = "image") {
     .replace(/[<>:"|?*]/g, "_")
     .slice(0, 150);
 }
+
+module.exports = { inspectAndValidateImage };

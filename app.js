@@ -6,8 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 
-const imagesRouter = require("./routes/images");
-
+// [MODIFIED] 僅掛載新版 Multer Router；舊 routes/images.js 不再進入執行流程。
 const imageRoutes = require("./backend/routes/image.routes");
 const { errorHandler, notFoundHandler } = require("./backend/middlewares/error.middleware");
 
@@ -15,72 +14,34 @@ const app = express();
 
 app.disable("x-powered-by");
 
-// ================================
 // 1. 一般 Middleware
-// ================================
-
-// 跨網域請求支援
 app.use(cors());
+app.use(express.json({ limit: "100kb" }));
 
-// 處理一般 JSON API 請求
-// multipart/form-data 由 Multer 處理
-app.use(
-  express.json({
-    limit: "100kb",
-  })
-);
-
-// ================================
 // 2. 靜態資源
-// ================================
-
-// 前台頁面
 app.use(express.static(path.join(__dirname, "public")));
 
-// 圖片輸出目錄
 const OUTPUT_DIR = path.resolve(process.env.OUTPUT_DIR || "./output");
-
 if (!fs.existsSync(OUTPUT_DIR)) {
-  fs.mkdirSync(OUTPUT_DIR, {
-    recursive: true,
-  });
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
-
 app.use("/downloads", express.static(OUTPUT_DIR));
 
-// ================================
-// 3. Health Check
-// ================================
-
+// 3. App Health Check
 app.get("/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    status: "ok",
-  });
+  res.status(200).json({ success: true, status: "ok" });
 });
 
-// ================================
-// 4. API Routes
-// ================================
-
-// 舊版圖片 API
-app.use("/images", imagesRouter);
-
-// 新版圖片 API
+// 4. 新版圖片 API
+// GET  /api/images/health
+// POST /api/images/inspect
+// POST /api/images/process
 app.use("/api/images", imageRoutes);
 
-// ================================
-// 5. 404
-// 必須放所有正常路由後面
-// ================================
-
+// 5. 所有正常路由之後才處理 404
 app.use(notFoundHandler);
 
-// ================================
-// 6. Error Handler
-// 一定放最後
-// ================================
-
+// 6. Error Handler 一定放最後
 app.use(errorHandler);
 
 module.exports = app;
