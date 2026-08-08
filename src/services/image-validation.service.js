@@ -1,5 +1,6 @@
 const sharp = require("sharp");
 const AppError = require("../errors/app-error");
+const imageConfig = require("../config/image.config");
 
 const allowedDetectedTypes = new Map([
   ["image/jpeg", "jpeg"],
@@ -8,9 +9,7 @@ const allowedDetectedTypes = new Map([
   ["image/avif", "avif"],
 ]);
 
-const MAX_WIDTH = 12_000;
-const MAX_HEIGHT = 12_000;
-const MAX_PIXELS = 50_000_000;
+const { maxWidth: MAX_WIDTH, maxHeight: MAX_HEIGHT, maxPixels: MAX_PIXELS, allowAnimated } = imageConfig.validation;
 
 // file-type v22 是 ESM 套件；本專案是 CommonJS，因此使用 dynamic import。
 let fileTypeModulePromise;
@@ -133,7 +132,7 @@ async function inspectAndValidateImage(file) {
   }
 
   const pageCount = metadata.pages ?? 1;
-  if (pageCount > 1) {
+  if (!allowAnimated && pageCount > 1) {
     throw new AppError({
       statusCode: 422,
       code: "ANIMATED_IMAGE_NOT_SUPPORTED",

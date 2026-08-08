@@ -3,12 +3,13 @@ const path = require("path");
 const { randomUUID } = require("crypto");
 const sharp = require("sharp");
 const AppError = require("../errors/app-error");
+const imageConfig = require("../config/image.config");
 
-const OUTPUT_DIR = path.resolve(process.env.OUTPUT_DIR || "./output");
-const ALLOWED_OUTPUT_FORMATS = new Set(["jpeg", "png", "webp", "avif"]);
+const OUTPUT_DIR = imageConfig.output.dir;
+const ALLOWED_OUTPUT_FORMATS = imageConfig.output.allowedFormats;
 
 async function processImageBuffer(inputBuffer, originalInfo, options = {}) {
-  const format = normalizeFormat(options.format || "webp");
+  const format = normalizeFormat(options.format || imageConfig.output.defaultFormat);
   const quality = parseQuality(options.quality);
   const maxWidth = parseMaxWidth(options.maxWidth);
 
@@ -21,7 +22,7 @@ async function processImageBuffer(inputBuffer, originalInfo, options = {}) {
   try {
     // rotate() 無參數時會依 EXIF orientation 自動校正方向。
     let pipeline = sharp(inputBuffer, {
-      limitInputPixels: 50_000_000,
+      limitInputPixels: imageConfig.validation.maxPixels,
       sequentialRead: true,
     }).rotate();
 
@@ -87,7 +88,7 @@ function normalizeFormat(value) {
 }
 
 function parseQuality(value) {
-  const quality = value === undefined || value === "" ? 80 : Number(value);
+  const quality = value === undefined || value === "" ? imageConfig.output.defaultQuality : Number(value);
   if (!Number.isInteger(quality) || quality < 1 || quality > 100) {
     throw new AppError({
       statusCode: 400,
@@ -101,11 +102,11 @@ function parseQuality(value) {
 function parseMaxWidth(value) {
   if (value === undefined || value === "" || value === null) return null;
   const maxWidth = Number(value);
-  if (!Number.isInteger(maxWidth) || maxWidth <= 0 || maxWidth > 12_000) {
+  if (!Number.isInteger(maxWidth) || maxWidth <= 0 || maxWidth > imageConfig.validation.maxWidth) {
     throw new AppError({
       statusCode: 400,
       code: "INVALID_MAX_WIDTH",
-      message: "maxWidth 必須是 1 到 12000 之間的整數。",
+      message: `maxWidth 必須是 1 到 ${imageConfig.validation.maxWidth} 之間的整數。`,
     });
   }
   return maxWidth;
