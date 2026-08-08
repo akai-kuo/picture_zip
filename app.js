@@ -13,42 +13,44 @@ const { errorHandler, notFoundHandler } = require("./backend/middlewares/error.m
 
 const app = express();
 
+app.disable("x-powered-by");
+
+// ================================
+// 1. 一般 Middleware
+// ================================
+
 // 跨網域請求支援
 app.use(cors());
 
-// 前台操作頁面（public/index.html、frontend.js、style.css）
-app.use(express.static(path.join(__dirname, "public")));
-
-// 處理完成的圖片下載 / 預覽，對應 /images/process 回傳的 previewUrl、downloadUrl
-const OUTPUT_DIR = path.resolve(process.env.OUTPUT_DIR || "./output");
-if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-app.use("/downloads", express.static(OUTPUT_DIR));
-
-// 圖片相關 API：GET /images/health、POST /images/process
-app.use("/images", imagesRouter);
-
-// 404：找不到路徑
-app.use((req, res) => {
-  res.status(404).json({ status: "error", data: null, message: "找不到這個路徑" });
-});
-
-// 統一錯誤處理（例如 formidable 在 multipart 解析階段丟出的錯誤）
-app.use((err, req, res, next) => {
-  console.error(err);
-  const statusCode = err.httpCode || 500;
-  const message = statusCode === 413 ? "圖片太大，請上傳較小的檔案" : "伺服器發生錯誤";
-  res.status(statusCode).json({ status: "error", data: null, message });
-});
-
-app.disable("x-powered-by");
-
-// 處理一般 JSON API 請求。
-// multipart/form-data 由 Multer 處理。
+// 處理一般 JSON API 請求
+// multipart/form-data 由 Multer 處理
 app.use(
   express.json({
     limit: "100kb",
   })
 );
+
+// ================================
+// 2. 靜態資源
+// ================================
+
+// 前台頁面
+app.use(express.static(path.join(__dirname, "public")));
+
+// 圖片輸出目錄
+const OUTPUT_DIR = path.resolve(process.env.OUTPUT_DIR || "./output");
+
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, {
+    recursive: true,
+  });
+}
+
+app.use("/downloads", express.static(OUTPUT_DIR));
+
+// ================================
+// 3. Health Check
+// ================================
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -57,9 +59,28 @@ app.get("/health", (req, res) => {
   });
 });
 
+// ================================
+// 4. API Routes
+// ================================
+
+// 舊版圖片 API
+app.use("/images", imagesRouter);
+
+// 新版圖片 API
 app.use("/api/images", imageRoutes);
 
+// ================================
+// 5. 404
+// 必須放所有正常路由後面
+// ================================
+
 app.use(notFoundHandler);
+
+// ================================
+// 6. Error Handler
+// 一定放最後
+// ================================
+
 app.use(errorHandler);
 
 module.exports = app;
