@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+.env
+
+# Runtime-generated images
+storage/output/*
+!storage/output/.gitkeep
+storage/temp/*
+!storage/temp/.gitkeep
+
+# Local test output
+coverage/
+*.log
