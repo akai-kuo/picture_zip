@@ -252,7 +252,7 @@ function clearAll() {
 }
 
 // =============================================
-// 圖片壓縮核心（呼叫後端 /images/process API）
+// 圖片壓縮核心（呼叫新版後端 /api/images/process API）
 // =============================================
 async function compressImage(item) {
   const format = getSelectedFormat();
@@ -265,15 +265,15 @@ async function compressImage(item) {
   fd.append('quality', quality);
   if (maxW) fd.append('maxWidth', maxW);
 
-  const res = await fetch('/images/process', { method: 'POST', body: fd });
+  const res = await fetch('/api/images/process', { method: 'POST', body: fd });
   const json = await res.json();
 
-  // 統一回應格式（草案，待後端確認）：{ status, data, message }
-  if (!res.ok || json.status === 'error') {
-    throw new Error(json.message || '伺服器處理失敗');
+  // 新版 API 統一格式：成功 { success: true, data }；錯誤 { success: false, error }
+  if (!res.ok || json.success !== true) {
+    throw new Error(json.error?.message || '伺服器處理失敗');
   }
 
-  return json.data; // { filename, originalSize, outputSize, savedPercent, format, previewUrl, downloadUrl }
+  return json.data.output; // { filename, originalSize, outputSize, savedPercent, format, previewUrl, downloadUrl }
 }
 
 async function startCompression() {

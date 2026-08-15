@@ -1,6 +1,3 @@
-// server.js
-// 啟動伺服器
-
 require("dotenv").config();
 const app = require("./app");
 
@@ -18,7 +15,6 @@ function shutdown(signal) {
       console.error(error);
       process.exit(1);
     }
-
     process.exit(0);
   });
 }

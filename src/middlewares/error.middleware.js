@@ -1,22 +1,20 @@
 const multer = require("multer");
-const { AppError } = require("../errors/app-error");
+const AppError = require("../errors/app-error");
 
-module.exports = {
-  notFoundHandler: function (req, res) {
-    res.status(404).json({
-      success: false,
-      error: {
-        code: "ROUTE_NOT_FOUND",
-        message: "找不到指定的 API 路徑。",
-      },
-    });
-  },
-};
+function notFoundHandler(req, res) {
+  return res.status(404).json({
+    success: false,
+    error: {
+      code: "ROUTE_NOT_FOUND",
+      message: "找不到指定的 API 路徑。",
+    },
+  });
+}
 
 // Express 錯誤 middleware 必須保留四個參數。
-module.exports.errorHandler = function (error, req, res, next) {
+function errorHandler(error, req, res, next) {
   if (error instanceof multer.MulterError) {
-    return module.exports.handleMulterError(error, res);
+    return handleMulterError(error, res);
   }
 
   if (error instanceof AppError) {
@@ -31,7 +29,6 @@ module.exports.errorHandler = function (error, req, res, next) {
   }
 
   console.error(error);
-
   return res.status(500).json({
     success: false,
     error: {
@@ -39,9 +36,9 @@ module.exports.errorHandler = function (error, req, res, next) {
       message: "伺服器處理圖片時發生錯誤。",
     },
   });
-};
+}
 
-module.exports.handleMulterError = function (error, res) {
+function handleMulterError(error, res) {
   const errorMap = {
     LIMIT_FILE_SIZE: {
       statusCode: 413,
@@ -83,9 +80,8 @@ module.exports.handleMulterError = function (error, res) {
 
   return res.status(mapped.statusCode).json({
     success: false,
-    error: {
-      code: mapped.code,
-      message: mapped.message,
-    },
+    error: { code: mapped.code, message: mapped.message },
   });
-};
+}
+
+module.exports = { notFoundHandler, errorHandler, handleMulterError };
