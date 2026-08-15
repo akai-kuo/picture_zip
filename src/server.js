@@ -3,8 +3,10 @@ const app = require("./app");
 
 const PORT = Number(process.env.PORT) || 3000;
 
-const server = app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+const HOST = "0.0.0.0";
+
+const server = app.listen(PORT, HOST, () => {
+  console.log(`✅ Server running on ${HOST}:${PORT}`);
 });
 
 function shutdown(signal) {
