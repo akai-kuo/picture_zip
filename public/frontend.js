@@ -5,7 +5,7 @@
 const API_BASE_URL =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:3000"
-    : "https://你的-render-service.onrender.com";
+    : "https://picture-zip-api.onrender.com/";
 
 // =============================================
 // 狀態管理
