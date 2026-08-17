@@ -70,8 +70,8 @@ NODE_ENV=development
 
 | 欄位 | 類型 | 必填 | 說明 |
 |---|---|---|---|
-| `image` | file | ✅ | 上傳的圖片（支援 JPG / PNG / WebP / AVIF，限 15MB） |
-| `format` | string | 否 | 輸出格式，預設 `webp`，可選 `jpeg` / `png` / `webp` / `avif` |
+| `image` | file | ✅ | 上傳的圖片（支援 JPG / PNG / WebP，限 15MB） |
+| `format` | string | 否 | 輸出格式，預設 `webp`，可選 `jpeg` / `png` / `webp` |
 | `quality` | number | 否 | 壓縮品質，1-100，預設 `80` |
 | `maxWidth` | number | 否 | 最大寬度，超過才縮小，最大 12000 |
 
@@ -158,7 +158,7 @@ curl -X POST http://localhost:3000/api/images/process \
 
 ## AI 協作說明
 
-- 使用工具：
-- 加速的地方：
-- 小組自己的判斷：
-- 印象最深的一次 AI 對話：
+- 使用工具：ChatGPT Codex、Claude
+- 加速的地方：協助規劃 API route 架構、查 `multer` / `sharp` 用法、整理 README 範例及 Demo Script 檔案文件的內容架構和設計；最主要是請 AI 協助對接前端和後端功能、進行 Debug 除錯，並依照 README 裡規劃的內容，逐一設計對應的路由 API
+- 小組自己的判斷：以圖片上傳功能層面，決定使用 multer 套件而非 formidable 套件去優化程式邏輯，最後決定最大可上傳檔案為 15MB 而非 5MB，以及一次可上傳檔案為 20 個檔案，藉此優化使用者體驗
+- 最有幫助的 prompt：請 AI 協助將各組員負責各功能的程式碼對接，並以 sharp 套件為基準，依序將圖片上傳、API 串接和設計整合至前端程式碼，以確保程式碼盡可能不大幅度改變的情況下，保持程式碼架構和功能運作正常
