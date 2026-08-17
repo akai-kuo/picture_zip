@@ -12,7 +12,33 @@ const app = express();
 app.disable("x-powered-by");
 
 // 1. Global middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN,
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // curl / Postman / server-to-server
+      // 通常沒有 Origin header
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      const error = new Error("Not allowed by CORS");
+
+      error.statusCode = 403;
+
+      return callback(error);
+    },
+
+    methods: ["GET", "POST", "OPTIONS"],
+
+    allowedHeaders: ["Content-Type"],
+  })
+);
 app.use(express.json({ limit: "100kb" }));
 
 // 2. Frontend static files
