@@ -19,12 +19,12 @@
 │  ├─ app.js
 │  ├─ server.js
 │  ├─ config/
-│  │  ├─ image.config.js       # 檔案大小、允許格式、輸出預設值
+│  │  ├─ image.config.js       # 檔案大小、允許格式、輸出預設值、定時清理參數
 │  │  └─ upload.config.js      # multer 設定
 │  ├─ routes/image.routes.js
 │  ├─ controllers/image.controller.js
 │  ├─ middlewares/
-│  ├─ services/                # 格式驗證、壓縮轉檔邏輯
+│  ├─ services/                # 格式驗證、壓縮轉檔、定時清理邏輯
 │  └─ errors/
 ├─ public/                     # 前台頁面（index.html、style.css、frontend.js）
 ├─ storage/
@@ -68,12 +68,12 @@ NODE_ENV=development
 
 `multipart/form-data`：
 
-| 欄位 | 類型 | 必填 | 說明 |
-|---|---|---|---|
-| `image` | file | ✅ | 上傳的圖片（支援 JPG / PNG / WebP，限 15MB） |
-| `format` | string | 否 | 輸出格式，預設 `webp`，可選 `jpeg` / `png` / `webp` |
-| `quality` | number | 否 | 壓縮品質，1-100，預設 `80` |
-| `maxWidth` | number | 否 | 最大寬度，超過才縮小，最大 12000 |
+| 欄位       | 類型   | 必填 | 說明                                                |
+| ---------- | ------ | ---- | --------------------------------------------------- |
+| `image`    | file   | ✅   | 上傳的圖片（支援 JPG / PNG / WebP，限 15MB）        |
+| `format`   | string | 否   | 輸出格式，預設 `webp`，可選 `jpeg` / `png` / `webp` |
+| `quality`  | number | 否   | 壓縮品質，1-100，預設 `80`                          |
+| `maxWidth` | number | 否   | 最大寬度，超過才縮小，最大 12000                    |
 
 成功回應範例：
 
@@ -124,21 +124,21 @@ curl -X POST http://localhost:3000/api/images/process \
 
 ## 常見錯誤
 
-| 情境 | 狀態碼 | 錯誤代碼（error.code） | 錯誤訊息（error.message） |
-|---|---|---|---|
-| 沒有上傳圖片 | 400 | `FILE_REQUIRED` | 請上傳一張圖片。 |
-| 圖片內容為空 | 400 | `EMPTY_FILE` | 上傳的圖片內容為空。 |
-| 上傳格式不支援（MIME 層級） | 400 | `UNSUPPORTED_CLIENT_MIME_TYPE` | 僅支援 JPEG、PNG、WebP 與 AVIF 圖片。 |
-| 無法辨識檔案真實格式 | 415 | `UNKNOWN_FILE_TYPE` | 無法辨識上傳檔案的真實格式。 |
-| 上傳格式不支援（實際內容層級） | 415 | `UNSUPPORTED_IMAGE_FORMAT` | 目前僅支援 JPEG、PNG、WebP 與 AVIF。 |
-| 檔案超過 15MB | 413 | `FILE_TOO_LARGE` | 上傳圖片超過檔案大小限制。 |
-| 圖片寬高超過上限 | 413 | `IMAGE_DIMENSIONS_TOO_LARGE` | 圖片寬高不得超過 12000 × 12000 像素。 |
-| 圖片已損壞或無法解析 | 422 | `INVALID_IMAGE_FILE` | 圖片已損壞、內容不完整或尺寸超出限制。 |
-| 動畫 / 多頁圖片 | 422 | `ANIMATED_IMAGE_NOT_SUPPORTED` | 目前不支援動畫或多頁圖片。 |
-| 輸出格式不支援 | 400 | `INVALID_OUTPUT_FORMAT` | 輸出格式僅支援 jpeg、png、webp、avif。 |
-| quality 超出範圍 | 400 | `INVALID_QUALITY_VALUE` | 圖片品質必須是 1 到 100 之間的整數。 |
-| maxWidth 超出範圍 | 400 | `INVALID_MAX_WIDTH` | maxWidth 必須是 1 到 12000 之間的整數。 |
-| 圖片處理失敗 | 500 | `IMAGE_PROCESSING_FAILED` | 圖片處理失敗，請稍後再試。 |
+| 情境                           | 狀態碼 | 錯誤代碼（error.code）         | 錯誤訊息（error.message）               |
+| ------------------------------ | ------ | ------------------------------ | --------------------------------------- |
+| 沒有上傳圖片                   | 400    | `FILE_REQUIRED`                | 請上傳一張圖片。                        |
+| 圖片內容為空                   | 400    | `EMPTY_FILE`                   | 上傳的圖片內容為空。                    |
+| 上傳格式不支援（MIME 層級）    | 400    | `UNSUPPORTED_CLIENT_MIME_TYPE` | 僅支援 JPEG、PNG、WebP 與 AVIF 圖片。   |
+| 無法辨識檔案真實格式           | 415    | `UNKNOWN_FILE_TYPE`            | 無法辨識上傳檔案的真實格式。            |
+| 上傳格式不支援（實際內容層級） | 415    | `UNSUPPORTED_IMAGE_FORMAT`     | 目前僅支援 JPEG、PNG、WebP 與 AVIF。    |
+| 檔案超過 15MB                  | 413    | `FILE_TOO_LARGE`               | 上傳圖片超過檔案大小限制。              |
+| 圖片寬高超過上限               | 413    | `IMAGE_DIMENSIONS_TOO_LARGE`   | 圖片寬高不得超過 12000 × 12000 像素。   |
+| 圖片已損壞或無法解析           | 422    | `INVALID_IMAGE_FILE`           | 圖片已損壞、內容不完整或尺寸超出限制。  |
+| 動畫 / 多頁圖片                | 422    | `ANIMATED_IMAGE_NOT_SUPPORTED` | 目前不支援動畫或多頁圖片。              |
+| 輸出格式不支援                 | 400    | `INVALID_OUTPUT_FORMAT`        | 輸出格式僅支援 jpeg、png、webp、avif。  |
+| quality 超出範圍               | 400    | `INVALID_QUALITY_VALUE`        | 圖片品質必須是 1 到 100 之間的整數。    |
+| maxWidth 超出範圍              | 400    | `INVALID_MAX_WIDTH`            | maxWidth 必須是 1 到 12000 之間的整數。 |
+| 圖片處理失敗                   | 500    | `IMAGE_PROCESSING_FAILED`      | 圖片處理失敗，請稍後再試。              |
 
 ## 產品用心點
 
